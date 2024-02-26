@@ -11,8 +11,8 @@ const Home = ({ popularMovies }) => {
   const [actorDetails, setActorDetails] = useState(null);
   const [moviesToShow, setMoviesToShow] = useState(16);
   const moviesPerPage = 8;
-
   const [sortOption, setSortOption] = useState('popularity');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const loader = useRef(null);
 
@@ -36,7 +36,13 @@ const Home = ({ popularMovies }) => {
       );
       const data = await response.json();
 
-      setCast(data.cast);
+      const castInJapanese = data.cast.map(actor => ({
+        ...actor,
+        name: actor.name,
+        profile_path: actor.profile_path,
+      }));
+
+      setCast(castInJapanese);
     } catch (error) {
       console.error('Error fetching cast:', error);
     }
@@ -49,7 +55,15 @@ const Home = ({ popularMovies }) => {
       );
       const data = await response.json();
 
-      setActorDetails(data);
+      const actorDetailsInJapanese = {
+        ...data,
+        name: data.name,
+        gender: data.gender === 1 ? '女性' : '男性',
+        birthday: data.birthday,
+        place_of_birth: data.place_of_birth,
+      };
+
+      setActorDetails(actorDetailsInJapanese);
     } catch (error) {
       console.error('Error fetching actor details:', error);
     }
@@ -82,7 +96,11 @@ const Home = ({ popularMovies }) => {
     setActorDetails(null);
   };
 
-  const showLoadMoreButton = moviesToShow < popularMovies.length;
+  const handleSearchChange = (term) => {
+    setSearchTerm(term);
+  };
+
+  const showLoadMoreButton = popularMovies && moviesToShow < popularMovies.length;
 
   const sortMovies = () => {
     switch (sortOption) {
@@ -97,17 +115,26 @@ const Home = ({ popularMovies }) => {
     }
   };
 
+  const filterMovies = () => {
+    return sortedMovies.filter(movie =>
+      movie.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
   const sortedMovies = sortMovies();
+  const filteredMovies = filterMovies();
 
   return (
     <div>
-      <h1>人気映画一覧</h1>
+      {selectedMovie && (
+        <div className={styles.buttonContainer}>
+          <button className={styles.botan} onClick={() => handleSortChange('popularity')}>人気の高い順</button>
+          <button className={styles.botan} onClick={() => handleSortChange('release_date')}>公開日順</button>
+          <button className={styles.botan} onClick={() => handleSortChange('alphabetical')}>アルファベット順</button>
+        </div>
+      )}
 
-      <div>
-        <button className={styles.botan} onClick={() => handleSortChange('popularity')}>人気の高い順</button>
-        <button className={styles.botan} onClick={() => handleSortChange('release_date')}>公開日順</button>
-        <button className={styles.botan} onClick={() => handleSortChange('alphabetical')}>アルファベット順</button>
-      </div>
+      <h1>人気映画一覧</h1>
 
       {selectedMovie ? (
         <MovieDetails
@@ -118,11 +145,21 @@ const Home = ({ popularMovies }) => {
           onBackToMovieList={handleBackToMovieList}
         />
       ) : (
-        <MovieList movies={sortedMovies.slice(0, moviesToShow)} onSelectMovie={handleMovieClick} />
+        <div>
+          <div className={styles.searchContainer}>
+            <input
+              type="text"
+              placeholder="作品名を検索"
+              onChange={(e) => handleSearchChange(e.target.value)}
+            />
+          </div>
+
+          <MovieList movies={filteredMovies.slice(0, moviesToShow)} onSelectMovie={handleMovieClick} />
+        </div>
       )}
 
       {!selectedMovie && showLoadMoreButton && (
-        <div>
+        <div className={styles.buttonContainer}>
           <button className={styles.botan} onClick={handleLoadMore} disabled={!showLoadMoreButton}>
             もっと見る
           </button>
@@ -135,7 +172,6 @@ const Home = ({ popularMovies }) => {
 export async function getStaticProps() {
   try {
     const totalPages = 10;
-
     let allMovies = [];
 
     for (let page = 1; page <= totalPages; page++) {
