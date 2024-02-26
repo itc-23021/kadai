@@ -1,5 +1,9 @@
-import "@/styles/globals.css";
+// pages/_app.js
+// import "@/styles/globals.css";  // どちらか一方をコメントアウトまたは削除
 
-export default function App({ Component, pageProps }) {
+function MyApp({ Component, pageProps }) {
   return <Component {...pageProps} />;
 }
+
+export default MyApp;
+
