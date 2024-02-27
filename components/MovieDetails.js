@@ -36,8 +36,9 @@ const MovieDetails = ({ movie, cast, onSelectActor, actorDetails, onBackToMovieL
       <button className={styles.botan} onClick={onBackToMovieList}>
         映画一覧に戻る
       </button>
+	        <div style={{ textAlign: 'center' }}>
       <img src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`} alt={`${movie.title}のポスター`} />
-
+</div>
       <h2>{movie.title}の出演者</h2>
       <select onChange={onSelectActor}>
         <option value="">出演者を選択してください</option>
