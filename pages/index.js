@@ -126,13 +126,12 @@ const Home = ({ popularMovies }) => {
 
   return (
     <div>
-      {selectedMovie && (
         <div className={styles.buttonContainer}>
           <button className={styles.botan} onClick={() => handleSortChange('popularity')}>人気の高い順</button>
           <button className={styles.botan} onClick={() => handleSortChange('release_date')}>公開日順</button>
           <button className={styles.botan} onClick={() => handleSortChange('alphabetical')}>アルファベット順</button>
         </div>
-      )}
+      
 
       <h1>人気映画一覧</h1>
 
